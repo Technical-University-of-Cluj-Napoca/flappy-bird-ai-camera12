@@ -42,16 +42,14 @@ game_over = False
 while running:
     clock.tick(FPS)
     screen.blit(bg, (0, 0))
+    bird_group.draw(screen)
+    pipe_group.draw(screen)
     screen.blit(base, (scroll, 820))
     screen.blit(base, (scroll + base_width, 820))
 
     if not game_started and not game_over:
         if start_button.draw(screen):
             game_started = True
-
-    bird_group.draw(screen)
-    pipe_group.draw(screen)
-
     if game_started and not game_over:
         current_time = pygame.time.get_ticks()
         if current_time - last_pipe > PIPE_FREQUENCY:
@@ -71,7 +69,11 @@ while running:
     else:
         start_button.draw(screen)
 
-    if faby.rect.bottom >= 810:
+    if faby.rect.bottom >= 810 or faby.rect.top < 0:
+        game_started = False
+        game_over = True
+
+    if pygame.sprite.groupcollide(bird_group, pipe_group, False, False):
         game_started = False
         game_over = True
 
