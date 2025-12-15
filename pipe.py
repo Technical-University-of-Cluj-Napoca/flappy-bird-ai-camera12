@@ -8,7 +8,7 @@ class Pipe(pygame.sprite.Sprite):
             'assets/Game Objects/pipe-green.png'
         ).convert_alpha()
         width = original_image.get_width()
-        self.image = pygame.transform.scale(original_image, (width, 600))
+        self.image = pygame.transform.scale(original_image, (width * 1.5, 600))
         self.rect = self.image.get_rect()
         if pos == 1:
             self.image = pygame.transform.flip(self.image, False, True)
@@ -18,4 +18,6 @@ class Pipe(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x -= SCROLL_SPEED
+        if self.rect.right < 0:
+            self.kill()
 
