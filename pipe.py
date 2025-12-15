@@ -4,6 +4,7 @@ from constants import *
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, x, y, pos):
         pygame.sprite.Sprite.__init__(self)
+        self.position = pos
         original_image = pygame.image.load(
             'assets/Game Objects/pipe-green.png'
         ).convert_alpha()
@@ -15,9 +16,9 @@ class Pipe(pygame.sprite.Sprite):
             self.rect.bottomleft = [x, y - int(PIPE_GAP / 2)]
         elif pos == 0:
             self.rect.topleft = [x, y + int(PIPE_GAP / 2)]
+        self.passed_by_bird = False
 
     def update(self):
         self.rect.x -= SCROLL_SPEED
         if self.rect.right < 0:
             self.kill()
-
