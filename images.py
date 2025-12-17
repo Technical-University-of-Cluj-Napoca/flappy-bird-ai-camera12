@@ -1,8 +1,7 @@
-import pygame
 from config import *
 MEDAL_SIZE = (60, 60)
 bg = pygame.image.load('Assets/background-day.png').convert()
-bg = pygame.transform.scale(bg, (win_width, win_height))
+bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 start_img = pygame.image.load('Assets/start_btn.png').convert_alpha()
 button_width = start_img.get_width() // 2

@@ -1,23 +1,21 @@
-import pygame
 from sys import exit
-import components
 from population import *
-from config import *
 from button import *
 from images import *
+from components import *
 
 pygame.init()
 pygame.display.set_caption("Flappy bird")
 clock = pygame.time.Clock()
 
 def generate_pipes():
-    pipes.append(components.Pipes(win_width))
+    pipes.append(Pipes(SCREEN_WIDTH))
 
 def draw_score(surface, score, y_pos):
     score_str = str(score)
     digit_width = digits_imgs[0].get_width()
     total_width = len(score_str) * digit_width
-    start_x = win_width / 2 - (total_width / 2)
+    start_x = SCREEN_WIDTH / 2 - (total_width / 2)
     for i, digit_char in enumerate(score_str):
         digit_img = digits_imgs[int(digit_char)]
         surface.blit(digit_img, (start_x + i * digit_width, y_pos))
@@ -51,8 +49,8 @@ class GroundScroll:
 
 def main():
     pipes_spawn_time = 10
-    start_button = Button(win_width // 2, win_height // 2, start_img)
-    restart_button = Button(win_width // 2, win_height // 2 + 80, restart_img)
+    start_button = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, start_img)
+    restart_button = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 80, restart_img)
     show_vision = False
     game_started = False
     mode = None
@@ -65,9 +63,9 @@ def main():
     scrolling_ground = GroundScroll(ground)
 
     while True:
-        window.blit(bg, (0, 0))
+        screen.blit(bg, (0, 0))
         scrolling_ground.update()
-        scrolling_ground.draw(window)
+        scrolling_ground.draw(screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -87,7 +85,7 @@ def main():
                         mode_text_timer = 120
 
         if not game_started:
-            if start_button.draw(window):
+            if start_button.draw(screen):
                 if mode is None:
                     mode = 'auto'
                 if mode == 'manual':
@@ -98,15 +96,12 @@ def main():
 
             font = pygame.font.SysFont(None, 30)
             text = font.render("Press A for Auto, M for Manual, then click Start", True, (255, 255, 255))
-            window.blit(text, (win_width // 2 - text.get_width() // 2, win_height // 2 - 100))
-            draw_score(window, score, 20)
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 100))
+            draw_score(screen, score, 20)
             if mode_text_timer > 0:
                 font = pygame.font.SysFont(None, 36)
                 text_surface = font.render(mode_text, True, (255, 255, 255))
-                window.blit(
-                    text_surface,
-                    (win_width // 2 - text_surface.get_width() // 2, win_height - 180)
-                )
+                screen.blit(text_surface, (SCREEN_WIDTH // 2 - text_surface.get_width() // 2, SCREEN_HEIGHT - 180))
                 mode_text_timer -= 1
             pygame.display.flip()
             clock.tick(60)
@@ -119,7 +114,7 @@ def main():
             pipes_spawn_time -= 1
 
         for p in pipes:
-            p.draw(window)
+            p.draw(screen)
             if not manual_and_dead:
                 p.update()
                 if p.off_screen:
@@ -144,24 +139,24 @@ def main():
                     population.natural_selection()
                     score = 0
 
-        draw_score(window, score, 20)
+        draw_score(screen, score, 20)
 
         if mode == 'manual' and manual_and_dead:
-            game_over_rect = game_over_img.get_rect(center=(win_width // 2, win_height // 2 - 120))
-            window.blit(game_over_img, game_over_rect)
+            game_over_rect = game_over_img.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 120))
+            screen.blit(game_over_img, game_over_rect)
 
             medal = get_medal(score)
             if medal:
-                medal_rect = medal.get_rect(center=(win_width // 2, win_height // 2 - 40))
-                window.blit(medal, medal_rect)
+                medal_rect = medal.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40))
+                screen.blit(medal, medal_rect)
 
             font = pygame.font.SysFont(None, 30)
             score_text = font.render(f"Score: {score}", True, (255, 255, 255))
             best_text = font.render(f"Best: {best_score}", True, (255, 255, 255))
-            window.blit(score_text, (win_width // 2 - score_text.get_width() // 2, restart_button.rect.centery - 90))
-            window.blit(best_text, (win_width // 2 - best_text.get_width() // 2, restart_button.rect.centery - 70))
+            screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, restart_button.rect.centery - 90))
+            screen.blit(best_text, (SCREEN_WIDTH // 2 - best_text.get_width() // 2, restart_button.rect.centery - 70))
 
-            if restart_button.draw(window):
+            if restart_button.draw(screen):
                 pipes.clear()
                 population = Population(1)
                 score = 0

@@ -24,8 +24,6 @@ class Bird(pygame.sprite.Sprite):
         self.flap = False
         self.alive = True
         self.lifespan = 0
-
-        # AI
         self.decision = None
         self.vision = [0.5, 1, 0.5]
         self.fitness = 0
@@ -86,7 +84,6 @@ class Bird(pygame.sprite.Sprite):
             if not p.passed:
                 return p
 
-    # AI related functions
     def look(self, draw_lines = False):
         if config.pipes:
             self.vision[0] = max(0, self.rect.center[1] - self.closest_pipe().top_rect.bottom) / 500
@@ -94,9 +91,9 @@ class Bird(pygame.sprite.Sprite):
             self.vision[2] = max(0, self.closest_pipe().bottom_rect.top - self.rect.center[1]) / 500
 
             if draw_lines:
-                pygame.draw.line(config.window, self.color, self.rect.center,(self.rect.center[0], config.pipes[0].top_rect.bottom))
-                pygame.draw.line(config.window, self.color, self.rect.center,(config.pipes[0].x, self.rect.center[1]))
-                pygame.draw.line(config.window, self.color, self.rect.center,(self.rect.center[0], config.pipes[0].bottom_rect.top))
+                pygame.draw.line(config.screen, self.color, self.rect.center, (self.rect.center[0], config.pipes[0].top_rect.bottom))
+                pygame.draw.line(config.screen, self.color, self.rect.center, (config.pipes[0].x, self.rect.center[1]))
+                pygame.draw.line(config.screen, self.color, self.rect.center, (self.rect.center[0], config.pipes[0].bottom_rect.top))
 
     def think(self):
         self.decision = self.brain.feed_forward(self.vision)

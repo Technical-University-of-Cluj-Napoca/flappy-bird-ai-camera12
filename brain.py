@@ -43,12 +43,9 @@ class Brain:
 
         for i in range(0, len(self.net)):
             self.net[i].activate()
-
         output_value = self.nodes[4].output_value
-
         for i in range(0, len(self.nodes)):
             self.nodes[i].input_value = 0
-
         return output_value
 
     def clone(self):
@@ -66,7 +63,6 @@ class Brain:
             if n.id == id:
                 return n
 
-    # 80 % chance that a connection undergoes mutation
     def mutate(self):
         if random.uniform(0, 1) < 0.8:
             for i in range(0, len(self.connections)):

@@ -20,7 +20,7 @@ class Population:
                 b.look(draw_vision)
                 if not manual:
                     b.think()
-                b.draw(config.window)
+                b.draw(config.screen)
                 b.update(config.ground)
 
     def natural_selection(self):
