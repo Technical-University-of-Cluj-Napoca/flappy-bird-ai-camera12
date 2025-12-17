@@ -4,16 +4,11 @@ import components
 from population import *
 from config import *
 from button import *
+from images import *
 
 pygame.init()
 pygame.display.set_caption("Flappy bird")
 clock = pygame.time.Clock()
-
-digits_imgs = []
-for i in range(10):
-    digit_img = pygame.image.load(f'Assets/UI/Numbers/{i}.png').convert_alpha()
-    digit_img = pygame.transform.scale(digit_img, (30, 40))
-    digits_imgs.append(digit_img)
 
 def generate_pipes():
     pipes.append(components.Pipes(win_width))
@@ -26,6 +21,17 @@ def draw_score(surface, score, y_pos):
     for i, digit_char in enumerate(score_str):
         digit_img = digits_imgs[int(digit_char)]
         surface.blit(digit_img, (start_x + i * digit_width, y_pos))
+
+def get_medal(score):
+    if score > 40:
+        return platinum_img
+    elif score > 30:
+        return gold_img
+    elif score > 20:
+        return silver_img
+    elif score > 10:
+        return bronze_img
+    return None
 
 class GroundScroll:
     def __init__(self, ground_obj):
@@ -45,16 +51,17 @@ class GroundScroll:
 
 def main():
     pipes_spawn_time = 10
-    bg = pygame.image.load('Assets/background-day.png').convert()
-    bg = pygame.transform.scale(bg, (win_width, win_height))
-    start_img = pygame.image.load('Assets/start_btn.png').convert_alpha()
-    start_img = pygame.transform.scale(start_img, (start_img.get_width()//2, start_img.get_height()//2))
     start_button = Button(win_width // 2, win_height // 2, start_img)
+    restart_button = Button(win_width // 2, win_height // 2 + 80, restart_img)
     show_vision = False
     game_started = False
     mode = None
+    mode_text = ""
+    mode_text_timer = 0
+    manual_and_dead = False
     population = None
     score = 0
+    best_score = 0
     scrolling_ground = GroundScroll(ground)
 
     while True:
@@ -72,8 +79,12 @@ def main():
                 elif not game_started:
                     if event.key == pygame.K_a:
                         mode = 'auto'
+                        mode_text = "Automatic mode selected"
+                        mode_text_timer = 120
                     elif event.key == pygame.K_m:
                         mode = 'manual'
+                        mode_text = "Manual mode selected"
+                        mode_text_timer = 120
 
         if not game_started:
             if start_button.draw(window):
@@ -89,21 +100,31 @@ def main():
             text = font.render("Press A for Auto, M for Manual, then click Start", True, (255, 255, 255))
             window.blit(text, (win_width // 2 - text.get_width() // 2, win_height // 2 - 100))
             draw_score(window, score, 20)
+            if mode_text_timer > 0:
+                font = pygame.font.SysFont(None, 36)
+                text_surface = font.render(mode_text, True, (255, 255, 255))
+                window.blit(
+                    text_surface,
+                    (win_width // 2 - text_surface.get_width() // 2, win_height - 180)
+                )
+                mode_text_timer -= 1
             pygame.display.flip()
             clock.tick(60)
             continue
 
-        if pipes_spawn_time <= 0:
-            generate_pipes()
-            pipes_spawn_time = 200
-        pipes_spawn_time -= 1
+        if not manual_and_dead:
+            if pipes_spawn_time <= 0:
+                generate_pipes()
+                pipes_spawn_time = 200
+            pipes_spawn_time -= 1
 
         for p in pipes:
             p.draw(window)
-            p.update()
-            if p.off_screen:
-                pipes.remove(p)
-                score += 1
+            if not manual_and_dead:
+                p.update()
+                if p.off_screen:
+                    pipes.remove(p)
+                    score += 1
 
         if population and not population.extinct():
             if mode == 'manual' and pygame.mouse.get_pressed()[0]:
@@ -113,12 +134,40 @@ def main():
             manual = (mode == 'manual')
             population.update_live_birds(draw_vision=show_vision, manual=manual)
         else:
-            pipes.clear()
-            if population:
-                population.natural_selection()
-                score = 0
+            if score > best_score:
+                best_score = score
+            if mode == 'manual':
+                manual_and_dead = True
+            else:
+                pipes.clear()
+                if population:
+                    population.natural_selection()
+                    score = 0
 
         draw_score(window, score, 20)
+
+        if mode == 'manual' and manual_and_dead:
+            game_over_rect = game_over_img.get_rect(center=(win_width // 2, win_height // 2 - 120))
+            window.blit(game_over_img, game_over_rect)
+
+            medal = get_medal(score)
+            if medal:
+                medal_rect = medal.get_rect(center=(win_width // 2, win_height // 2 - 40))
+                window.blit(medal, medal_rect)
+
+            font = pygame.font.SysFont(None, 30)
+            score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+            best_text = font.render(f"Best: {best_score}", True, (255, 255, 255))
+            window.blit(score_text, (win_width // 2 - score_text.get_width() // 2, restart_button.rect.centery - 90))
+            window.blit(best_text, (win_width // 2 - best_text.get_width() // 2, restart_button.rect.centery - 70))
+
+            if restart_button.draw(window):
+                pipes.clear()
+                population = Population(1)
+                score = 0
+                manual_and_dead = False
+
+
         pygame.display.flip()
         clock.tick(60)
 
